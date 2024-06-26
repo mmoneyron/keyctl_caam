@@ -500,14 +500,25 @@ int main(int argc, char *argv[])
 	strcpy(key_path, KEYBLOB_LOCATION);
 	strcat(key_path, key_name);
 
-	if (!strcmp(op, "create"))
-		caam_keygen_create(key_path, key_enc, key_mode, key_value,
+	if (!strcmp(op, "create")) {
+		ret = caam_keygen_create(key_path, key_enc, key_mode, key_value,
 				   text_type, strlen(key_value));
-	if (!strcmp(op, "import"))
-		caam_keygen_import(blob_name, key_path);
+		if (ret != 0)
+			ret = -1;
+	}
 
-	if (!strcmp(op, "derive"))
+	if (!strcmp(op, "import")) {
+		caam_keygen_import(blob_name, key_path);
+		if (ret != 0)
+			ret = -1;
+	}
+
+	if (!strcmp(op, "derive")) {
 		caam_keygen_derive_key(hsalt, pass_phrase, dgst, key_path);
+		if (ret != 0)
+			ret = -1;
+	}
+
 	close(caam_keygen_fd);
 	free(key_path);
 
@@ -517,5 +528,5 @@ out_usage:
 	caam_keygen_usage();
 
 out:
-	return 0;
+	return ret;
 }
